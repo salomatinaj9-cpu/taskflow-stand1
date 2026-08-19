@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swagger UI — Документация API</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css">
+    <style>
+        html {
+            box-sizing: border-box;
+            overflow: -moz-scrollbars-vertical;
+            overflow-y: scroll;
+        }
+        *,
+        *:before,
+        *:after {
+            box-sizing: inherit;
+        }
+        body {
+            margin: 0;
+            background: #fafafa;
+        }
+        .topbar {
+            background: #1a1a2e;
+            padding: 16px 24px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .topbar .logo {
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .topbar .logo span {
+            color: #4f46e5;
+        }
+        .topbar .version {
+            background: #4f46e5;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .topbar .badge {
+            background: #10b981;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: auto;
+        }
+        .topbar a {
+            color: white;
+            text-decoration: none;
+        }
+        .topbar a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="topbar">
+        <div class="logo">📋 Task<span>Flow</span></div>
+        <span class="version">API v1.0</span>
+        <span class="badge">🔒 Auth Required</span>
+        <a href="index.html" style="margin-left:auto;">← Вернуться к приложению</a>
+    </div>
+
+    <div id="swagger-ui"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-standalone-preset.js"></script>
+    <script>
+        window.onload = function() {
+            // Swagger UI инициализация
+            const ui = SwaggerUIBundle({
+                url: "swagger.json", // Путь к файлу со спецификацией
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                layout: "StandaloneLayout",
+                // Добавляем базовый URL для запросов
+                requestInterceptor: function(request) {
+                    // Можно добавить заголовки авторизации
+                    const session = localStorage.getItem('taskflow_session');
+                    if (session) {
+                        try {
+                            const user = JSON.parse(session);
+                            request.headers['X-User-Email'] = user.email;
+                        } catch (e) {}
+                    }
+                    return request;
+                }
+            });
+            window.ui = ui;
+        };
+    </script>
+</body>
+</html>

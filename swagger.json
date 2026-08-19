@@ -1,0 +1,715 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "TaskFlow API",
+        "description": "API для управления пользователями и профилями",
+        "version": "1.0.0",
+        "contact": {
+            "name": "TaskFlow Support",
+            "email": "support@taskflow.com"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        }
+    },
+    "servers": [
+        {
+            "url": "http://localhost:5500",
+            "description": "Локальный сервер (Live Server)"
+        },
+        {
+            "url": "https://jsonplaceholder.typicode.com",
+            "description": "Тестовый API (JSONPlaceholder)"
+        }
+    ],
+    "tags": [
+        {
+            "name": "auth",
+            "description": "Авторизация и управление пользователями"
+        },
+        {
+            "name": "profiles",
+            "description": "Управление профилями пользователей"
+        },
+        {
+            "name": "dashboard",
+            "description": "Статистика и обзор"
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+                "description": "Введите токен: `Bearer <token>`"
+            },
+            "sessionAuth": {
+                "type": "apiKey",
+                "in": "header",
+                "name": "X-User-Email",
+                "description": "Email пользователя для идентификации"
+            }
+        },
+        "schemas": {
+            "User": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "user@example.com",
+                        "description": "Email пользователя (6-50 символов)"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Иван Иванов",
+                        "description": "Имя пользователя"
+                    },
+                    "password": {
+                        "type": "string",
+                        "format": "password",
+                        "example": "password123",
+                        "description": "Пароль (6-50 символов)"
+                    }
+                },
+                "required": ["email", "password"]
+            },
+            "Profile": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1,
+                        "description": "Уникальный идентификатор профиля"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Иван Иванов",
+                        "description": "Имя в профиле"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "ivan@example.com",
+                        "description": "Email в профиле"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "+7 999 123-45-67",
+                        "description": "Телефон"
+                    },
+                    "website": {
+                        "type": "string",
+                        "example": "example.com",
+                        "description": "Сайт"
+                    },
+                    "createdBy": {
+                        "type": "string",
+                        "example": "user@example.com",
+                        "description": "Кто создал профиль"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-01-15T10:30:00Z",
+                        "description": "Дата создания"
+                    }
+                }
+            },
+            "Error": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "example": 400
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Validation error"
+                    }
+                }
+            }
+        }
+    },
+    "paths": {
+        "/users": {
+            "get": {
+                "tags": ["auth"],
+                "summary": "Получить всех пользователей",
+                "description": "Возвращает список всех зарегистрированных пользователей",
+                "responses": {
+                    "200": {
+                        "description": "Успешный ответ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/User"
+                                    }
+                                },
+                                "example": [
+                                    {
+                                        "email": "user@example.com",
+                                        "name": "Тестовый Пользователь"
+                                    },
+                                    {
+                                        "email": "admin@example.com",
+                                        "name": "Администратор"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": ["auth"],
+                "summary": "Регистрация пользователя",
+                "description": "Создаёт нового пользователя в системе",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/User"
+                            },
+                            "example": {
+                                "email": "newuser@example.com",
+                                "name": "Новый Пользователь",
+                                "password": "password123"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Пользователь создан",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                },
+                                "example": {
+                                    "email": "newuser@example.com",
+                                    "name": "Новый Пользователь"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Ошибка валидации",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                },
+                                "example": {
+                                    "status": 400,
+                                    "message": "Email должен содержать от 6 до 50 символов"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Пользователь уже существует",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                },
+                                "example": {
+                                    "status": 409,
+                                    "message": "Пользователь с таким email уже существует"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/login": {
+            "post": {
+                "tags": ["auth"],
+                "summary": "Вход в систему",
+                "description": "Аутентификация пользователя",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "email": "user@example.com",
+                                "password": "password123"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Успешный вход",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "user": {
+                                            "$ref": "#/components/schemas/User"
+                                        },
+                                        "session": {
+                                            "type": "string",
+                                            "example": "session_token_here"
+                                        }
+                                    }
+                                },
+                                "example": {
+                                    "user": {
+                                        "email": "user@example.com",
+                                        "name": "Тестовый Пользователь"
+                                    },
+                                    "session": "saved_in_localStorage"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Неверный логин или пароль",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                },
+                                "example": {
+                                    "status": 401,
+                                    "message": "Неверный пароль"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/profile": {
+            "get": {
+                "tags": ["auth"],
+                "summary": "Получить профиль текущего пользователя",
+                "description": "Возвращает данные текущего пользователя",
+                "security": [
+                    {
+                        "sessionAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "X-User-Email",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Email пользователя"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Данные пользователя",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                },
+                                "example": {
+                                    "email": "user@example.com",
+                                    "name": "Тестовый Пользователь"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Пользователь не найден"
+                    }
+                }
+            },
+            "put": {
+                "tags": ["auth"],
+                "summary": "Обновить профиль пользователя",
+                "description": "Обновляет данные текущего пользователя",
+                "security": [
+                    {
+                        "sessionAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Новое Имя"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "newemail@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "newpassword123"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "name": "Новое Имя",
+                                "email": "newemail@example.com",
+                                "password": "newpassword123"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Профиль обновлён",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Ошибка валидации",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/profiles": {
+            "get": {
+                "tags": ["profiles"],
+                "summary": "Получить все профили пользователя",
+                "description": "Возвращает список всех профилей, созданных текущим пользователем",
+                "security": [
+                    {
+                        "sessionAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Список профилей",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Profile"
+                                    }
+                                },
+                                "example": [
+                                    {
+                                        "id": 1,
+                                        "name": "Иван Иванов",
+                                        "email": "ivan@example.com",
+                                        "phone": "+7 999 123-45-67",
+                                        "website": "example.com"
+                                    },
+                                    {
+                                        "id": 2,
+                                        "name": "Петр Петров",
+                                        "email": "petr@example.com",
+                                        "phone": "+7 999 765-43-21",
+                                        "website": "petr-site.com"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Не авторизован"
+                    }
+                }
+            },
+            "post": {
+                "tags": ["profiles"],
+                "summary": "Создать новый профиль",
+                "description": "Создаёт новый профиль для текущего пользователя",
+                "security": [
+                    {
+                        "sessionAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Иван Иванов"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "ivan@example.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+7 999 123-45-67"
+                                    },
+                                    "website": {
+                                        "type": "string",
+                                        "example": "example.com"
+                                    }
+                                },
+                                "required": ["name", "email"]
+                            },
+                            "example": {
+                                "name": "Иван Иванов",
+                                "email": "ivan@example.com",
+                                "phone": "+7 999 123-45-67",
+                                "website": "example.com"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Профиль создан",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Profile"
+                                },
+                                "example": {
+                                    "id": 3,
+                                    "name": "Иван Иванов",
+                                    "email": "ivan@example.com",
+                                    "phone": "+7 999 123-45-67",
+                                    "website": "example.com",
+                                    "createdBy": "user@example.com",
+                                    "createdAt": "2024-01-15T10:30:00Z"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Ошибка валидации"
+                    }
+                }
+            }
+        },
+        "/profiles/{id}": {
+            "get": {
+                "tags": ["profiles"],
+                "summary": "Получить профиль по ID",
+                "description": "Возвращает конкретный профиль по его ID",
+                "security": [
+                    {
+                        "sessionAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true,
+                        "description": "ID профиля"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Профиль найден",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Profile"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Профиль не найден"
+                    }
+                }
+            },
+            "put": {
+                "tags": ["profiles"],
+                "summary": "Обновить профиль по ID",
+                "description": "Обновляет существующий профиль",
+                "security": [
+                    {
+                        "sessionAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true,
+                        "description": "ID профиля"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Profile"
+                            },
+                            "example": {
+                                "name": "Обновлённое Имя",
+                                "email": "updated@example.com",
+                                "phone": "+7 999 111-22-33",
+                                "website": "updated-site.com"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Профиль обновлён",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Profile"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Профиль не найден"
+                    }
+                }
+            },
+            "delete": {
+                "tags": ["profiles"],
+                "summary": "Удалить профиль по ID",
+                "description": "Удаляет существующий профиль",
+                "security": [
+                    {
+                        "sessionAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true,
+                        "description": "ID профиля"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Профиль удалён"
+                    },
+                    "404": {
+                        "description": "Профиль не найден"
+                    }
+                }
+            }
+        },
+        "/dashboard": {
+            "get": {
+                "tags": ["dashboard"],
+                "summary": "Получить статистику",
+                "description": "Возвращает общую статистику по профилям пользователя",
+                "security": [
+                    {
+                        "sessionAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Статистика",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "totalProfiles": {
+                                            "type": "integer",
+                                            "example": 5
+                                        },
+                                        "totalUsers": {
+                                            "type": "integer",
+                                            "example": 3
+                                        },
+                                        "lastProfiles": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Profile"
+                                            }
+                                        }
+                                    }
+                                },
+                                "example": {
+                                    "totalProfiles": 5,
+                                    "totalUsers": 3,
+                                    "lastProfiles": [
+                                        {
+                                            "id": 1,
+                                            "name": "Иван Иванов",
+                                            "email": "ivan@example.com"
+                                        },
+                                        {
+                                            "id": 2,
+                                            "name": "Петр Петров",
+                                            "email": "petr@example.com"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
