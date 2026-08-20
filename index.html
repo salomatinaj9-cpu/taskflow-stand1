@@ -1814,6 +1814,21 @@
     }
 
     log('🚀 TaskFlow загружен');
+        // ===== ТЕСТОВЫЙ ЗАПРОС ДЛЯ NETWORK =====
+    log('📤 Отправляем тестовый запрос к API...');
+    
+    fetch('https://jsonplaceholder.typicode.com/users/1')
+        .then(response => {
+            log(`📥 Ответ получен! Статус: ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            log(`✅ Данные загружены: ${data.name} (${data.email})`);
+            console.log('📦 Данные от API:', data);
+        })
+        .catch(error => {
+            log(`❌ Ошибка запроса: ${error.message}`);
+        });
     log(`📊 Пользователей в системе: ${loadUsers().length}`);
     log('💡 Для входа: user@example.com / password123');
     log('📝 Пароль должен быть от 6 до 50 символов');
